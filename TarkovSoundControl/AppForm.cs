@@ -103,10 +103,11 @@ namespace TarkovSoundControl
 
             if (RegCurrentUser.OpenSubKey(TARKOV_VOLUME_REG_SUBKEY) != null)
             {
-                String savedVolume = RegCurrentUser
+                /*String savedVolume = RegCurrentUser
                     .OpenSubKey(TARKOV_VOLUME_REG_SUBKEY)
                     .GetValue(TARKOV_VOLUME_REG_KEY)
-                    .ToString();
+                    .ToString();*/
+                String savedVolume = GetRegVolume();
 
                 label3.Text = savedVolume;
                 trackBar1.Value = Int32.Parse(savedVolume);
@@ -116,6 +117,19 @@ namespace TarkovSoundControl
             MyTimer.Tick += new EventHandler(TimerEventProcessor);
             MyTimer.Interval = 300;
             MyTimer.Start();
+        }
+
+        private string GetRegVolume()
+        {
+            object savedVolume = RegCurrentUser
+                    .OpenSubKey(TARKOV_VOLUME_REG_SUBKEY)
+                    .GetValue(TARKOV_VOLUME_REG_KEY);
+            if (savedVolume == null)
+            {
+                return TarkovBackgroundVolume.ToString();
+            }
+
+            return savedVolume.ToString();
         }
 
         private bool IsTarkovForeground(int tarkovProcessId)
