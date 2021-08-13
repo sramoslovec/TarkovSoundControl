@@ -28,10 +28,12 @@ namespace TarkovSoundControl
         }
 
         public static Timer MyTimer { get => myTimer; set => myTimer = value; }
+
         protected override void OnClosing(CancelEventArgs e)
         {
             RestoreDefaultVolume();
             notifyIcon.Visible = false;
+
             base.OnClosing(e);
         }
 
@@ -50,7 +52,7 @@ namespace TarkovSoundControl
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern Int32 GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-        private void checkBox1_Click(object sender, System.EventArgs e)
+        private void CheckBox1_Click(object sender, System.EventArgs e)
         {
             if (checkBox1.Checked)
             {
@@ -64,9 +66,8 @@ namespace TarkovSoundControl
             {
                 RegistryKey autorunReg = RegCurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
                 if (autorunReg.GetValue(APPLICATION_NAME) != null)
-                {
                     autorunReg.DeleteValue(APPLICATION_NAME);
-                }
+
                 autorunReg.Close();
             }
         }
@@ -75,14 +76,13 @@ namespace TarkovSoundControl
         {
             if (startMinimized)
             {
-                this.WindowState = FormWindowState.Minimized;
-                this.Visible = false;
-                this.ShowInTaskbar = false;
+                WindowState = FormWindowState.Minimized;
+                Visible = false;
+                ShowInTaskbar = false;
                 Hide();
+
                 notifyIcon.Visible = true;
             }
-
-            string startPath = Environment.GetFolderPath(Environment.SpecialFolder.Programs) + @"\TarkovTool\TarkovSoundControl.appref-ms";
 
             notifyIcon.MouseDoubleClick += NotifyIcon_DoubleClick;
 
@@ -93,20 +93,16 @@ namespace TarkovSoundControl
             trackBar1.ValueChanged += new EventHandler(TrackBar_ValueChanged);
 
             RegistryKey autorunReg = RegCurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
             if (autorunReg.GetValue(APPLICATION_NAME) != null)
-            {
                 checkBox1.Checked = true;
-            }
+
             autorunReg.Close();
 
-            checkBox1.Click += checkBox1_Click;
+            checkBox1.Click += CheckBox1_Click;
 
             if (RegCurrentUser.OpenSubKey(TARKOV_VOLUME_REG_SUBKEY) != null)
             {
-                /*String savedVolume = RegCurrentUser
-                    .OpenSubKey(TARKOV_VOLUME_REG_SUBKEY)
-                    .GetValue(TARKOV_VOLUME_REG_KEY)
-                    .ToString();*/
                 String savedVolume = GetRegVolume();
 
                 label3.Text = savedVolume;
@@ -124,10 +120,10 @@ namespace TarkovSoundControl
             object savedVolume = RegCurrentUser
                     .OpenSubKey(TARKOV_VOLUME_REG_SUBKEY)
                     .GetValue(TARKOV_VOLUME_REG_KEY);
+
             if (savedVolume == null)
-            {
                 return TarkovBackgroundVolume.ToString();
-            }
+            
 
             return savedVolume.ToString();
         }
@@ -172,9 +168,7 @@ namespace TarkovSoundControl
         private void RestoreDefaultVolume()
         {
             if (TarkovProcess != null)
-            {
                 WinMixesManager.VolumeMixer.SetApplicationVolume(TarkovProcess.Id, (float)TarkovDefaultVolume);
-            }
         }
 
         private void TimerEventProcessor(Object myObject, EventArgs myEventArgs)
@@ -183,9 +177,7 @@ namespace TarkovSoundControl
             if (pname.Length == 0)
             {
                 if (TarkovProcess != null)
-                {
                     TarkovProcess = null;
-                }
 
                 label1.Text = "EFT is not launched";
                 label1.ForeColor = Color.DarkRed;
