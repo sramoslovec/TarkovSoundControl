@@ -20,14 +20,14 @@ namespace TarkovSoundControl
             {
                 if (arg == "--minimized")
                 {
-                    Form1 form = new Form1();
+                    AppForm form = new AppForm();
                     form.startMinimized = true;
                     Application.Run(mainForm: form);
                     return;
                 }
             }
 
-            Application.Run(new Form1());
+            Application.Run(new AppForm());
         }
 
         public static class Extensions

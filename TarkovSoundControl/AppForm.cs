@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace TarkovSoundControl
 {
-    public partial class Form1 : Form
+    public partial class AppForm : Form
     {
         static Timer myTimer = new Timer();
 
@@ -26,7 +26,7 @@ namespace TarkovSoundControl
 
         public bool startMinimized = false;
 
-        public Form1()
+        public AppForm()
         {
             InitializeComponent();
 

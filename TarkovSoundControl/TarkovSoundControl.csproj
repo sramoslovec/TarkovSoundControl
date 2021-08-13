@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>tarkovSoundControl2.ico</ApplicationIcon>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
     <Authors>Sramoslovec</Authors>
     <Product>Tarkov Sound Control</Product>
     <Description>Allows to control Escape From Tarkov volume while game minimized</Description>
