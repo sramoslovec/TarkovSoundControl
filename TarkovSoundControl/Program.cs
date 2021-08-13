@@ -12,10 +12,6 @@ namespace TarkovSoundControl
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            /*
-             * TODO: prevent launching multiple app instances
-             */
-
             foreach (String arg in args)
             {
                 if (arg == "--minimized")
@@ -32,9 +28,6 @@ namespace TarkovSoundControl
 
         public static class Extensions
         {
-            [System.Runtime.InteropServices.DllImport("kernel32.dll")]
-            private static extern uint GetModuleFileName(IntPtr hModule, System.Text.StringBuilder lpFilename, int nSize);
-
             private static readonly int MAX_PATH = 255;
 
             public static string GetExecutablePath()
@@ -50,6 +43,9 @@ namespace TarkovSoundControl
                     return System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
                 }
             }
+
+            [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+            private static extern uint GetModuleFileName(IntPtr hModule, System.Text.StringBuilder lpFilename, int nSize);
         }
     }
 }
