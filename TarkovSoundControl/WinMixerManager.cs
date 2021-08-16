@@ -6,9 +6,11 @@ namespace TarkovSoundControl
     namespace WinMixesManager
     {
         /*
-         *  This whole code below was stolen 
+         *  This whole code below was stolen
          *  from there https://stackoverflow.com/a/25584074/6362252
+         *  and sligtly modified
          */
+
         public class VolumeMixer
         {
             public static float? GetApplicationVolume(int pid)
@@ -147,6 +149,7 @@ namespace TarkovSoundControl
         internal interface IAudioSessionManager2
         {
             int NotImpl1();
+
             int NotImpl2();
 
             [PreserveSig]

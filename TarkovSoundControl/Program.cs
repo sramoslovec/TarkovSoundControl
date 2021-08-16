@@ -18,6 +18,7 @@ namespace TarkovSoundControl
                 {
                     AppForm form = new AppForm();
                     form.startMinimized = true;
+
                     Application.Run(mainForm: form);
                     return;
                 }

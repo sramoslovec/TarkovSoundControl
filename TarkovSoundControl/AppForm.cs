@@ -10,15 +10,21 @@ namespace TarkovSoundControl
     public partial class AppForm : Form
     {
         public bool startMinimized = false;
-        private const String APPLICATION_NAME = "TarkovSoundControl";
-        private const String TARKOV_PROCESS_NAME = "EscapeFromTarkov";
-        private const String TARKOV_VOLUME_REG_KEY = "TarkovOnBackgroundVolume";
-        private const String TARKOV_VOLUME_REG_SUBKEY = @"SOFTWARE\TarkovSoundControlSettings";
+        private const string APPLICATION_NAME = "TarkovSoundControl";
+        private const string TARKOV_PROCESS_NAME = "EscapeFromTarkov";
+        private const string TARKOV_VOLUME_REG_KEY = "TarkovOnBackgroundVolume";
+        private const string TARKOV_FOREGROUND_VOLUME_REG_KEY = "TarkovOnForegroundVolume";
+        private const string TARKOV_VOLUME_REG_SUBKEY = @"SOFTWARE\TarkovSoundControlSettings";
+
+        public string TEXT_GAME_LAUNCHED = "EFT is launched";
+        public string TEXT_GAME_NOT_LAUNCHED = "EFT is not launched";
+
         private static Timer myTimer = new Timer();
         private readonly RegistryKey RegCurrentUser = Registry.CurrentUser;
         private float TarkovBackgroundVolume = 50f;
-        private float? TarkovDefaultVolume = null;
-        private Process TarkovProcess;
+        private float TarkovDefaultVolume = 100f;
+        private int? TarkovProcessId;
+
         public AppForm()
         {
             InitializeComponent();
@@ -90,7 +96,7 @@ namespace TarkovSoundControl
             notifyIcon.ContextMenuStrip.Items.Add("Open", null, TrayMenuOpen_Click);
             notifyIcon.ContextMenuStrip.Items.Add("Close", null, TrayMenuClose_Click);
 
-            trackBar1.ValueChanged += new EventHandler(TrackBar_ValueChanged);
+            trackBarBackegroundVolume.ValueChanged += new EventHandler(TrackBar_ValueChanged);
 
             RegistryKey autorunReg = RegCurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
@@ -105,8 +111,8 @@ namespace TarkovSoundControl
             {
                 String savedVolume = GetRegVolume();
 
-                label3.Text = savedVolume;
-                trackBar1.Value = Int32.Parse(savedVolume);
+                labelBackgroundVolume.Text = savedVolume;
+                trackBarBackegroundVolume.Value = Int32.Parse(savedVolume);
                 TarkovBackgroundVolume = Int32.Parse(savedVolume);
             }
 
@@ -123,7 +129,6 @@ namespace TarkovSoundControl
 
             if (savedVolume == null)
                 return TarkovBackgroundVolume.ToString();
-            
 
             return savedVolume.ToString();
         }
@@ -167,8 +172,8 @@ namespace TarkovSoundControl
 
         private void RestoreDefaultVolume()
         {
-            if (TarkovProcess != null)
-                WinMixesManager.VolumeMixer.SetApplicationVolume(TarkovProcess.Id, (float)TarkovDefaultVolume);
+            if (TarkovProcessId != null)
+                WinMixesManager.VolumeMixer.SetApplicationVolume((int)TarkovProcessId, (float)TarkovDefaultVolume);
         }
 
         private void TimerEventProcessor(Object myObject, EventArgs myEventArgs)
@@ -176,52 +181,58 @@ namespace TarkovSoundControl
             Process[] pname = Process.GetProcessesByName(TARKOV_PROCESS_NAME);
             if (pname.Length == 0)
             {
-                if (TarkovProcess != null)
-                    TarkovProcess = null;
+                TarkovProcessId = null;
 
-                label1.Text = "EFT is not launched";
-                label1.ForeColor = Color.DarkRed;
+                SetTextGameNotLaunched();
             }
             else
             {
-                TarkovProcess = pname[0];
-
-                label1.Text = "EFT is launched";
-                label1.ForeColor = Color.DarkGreen;
-
-                if (TarkovDefaultVolume == null)
+                if (TarkovProcessId == null)
                 {
-                    TarkovDefaultVolume = WinMixesManager.VolumeMixer.GetApplicationVolume(TarkovProcess.Id);
-                    if (TarkovDefaultVolume == null)
-                        return;
+                    TarkovProcessId = pname[0].Id;
+                }
+
+                SetTextGameLaunched();
+
+                /*float? vol = WinMixesManager.VolumeMixer.GetApplicationVolume((int)TarkovProcessId);
+                TarkovDefaultVolume = (float)(vol != null ? vol : 100f);*/
+
+                if (IsTarkovForeground((int)TarkovProcessId))
+                {
+                    WinMixesManager.VolumeMixer.SetApplicationVolume((int)TarkovProcessId, (float)TarkovDefaultVolume);
                 }
                 else
                 {
-                    if (IsTarkovForeground(TarkovProcess.Id))
-                    {
-                        WinMixesManager.VolumeMixer.SetApplicationVolume(TarkovProcess.Id, (float)TarkovDefaultVolume);
-                    }
-                    else
-                    {
-                        WinMixesManager.VolumeMixer.SetApplicationVolume(TarkovProcess.Id, TarkovBackgroundVolume);
-                    }
+                    WinMixesManager.VolumeMixer.SetApplicationVolume((int)TarkovProcessId, TarkovBackgroundVolume);
                 }
             }
         }
 
+        private void SetTextGameLaunched()
+        {
+            label1.Text = TEXT_GAME_LAUNCHED;
+            label1.ForeColor = Color.DarkGreen;
+        }
+
+        private void SetTextGameNotLaunched()
+        {
+            label1.Text = TEXT_GAME_NOT_LAUNCHED;
+            label1.ForeColor = Color.DarkRed;
+        }
+
         private void TrackBar_ValueChanged(object sender, EventArgs e)
         {
-            TarkovBackgroundVolume = (float)trackBar1.Value;
+            TarkovBackgroundVolume = (float)trackBarBackegroundVolume.Value;
 
             RegistryKey rkVolumeSubkey = RegCurrentUser.OpenSubKey(TARKOV_VOLUME_REG_SUBKEY, true);
             if (rkVolumeSubkey != null)
             {
-                rkVolumeSubkey.SetValue(TARKOV_VOLUME_REG_KEY, trackBar1.Value, RegistryValueKind.DWord);
+                rkVolumeSubkey.SetValue(TARKOV_VOLUME_REG_KEY, trackBarBackegroundVolume.Value, RegistryValueKind.DWord);
                 rkVolumeSubkey.Close();
                 RegCurrentUser.Close();
             }
 
-            label3.Text = trackBar1.Value.ToString();
+            labelBackgroundVolume.Text = trackBarBackegroundVolume.Value.ToString();
         }
 
         private void TrayMenuClose_Click(object sender, EventArgs e)
